@@ -1,6 +1,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/maven,java,groovy,intellij+all,macos
 # Edit at https://www.toptal.com/developers/gitignore?templates=maven,java,groovy,intellij+all,macos
 
+### Mysql ###
+.mysql
+
 ### Groovy ###
 # .gitignore created from Groovy contributors in https://github.com/apache/groovy/blob/master/.gitignore
 
