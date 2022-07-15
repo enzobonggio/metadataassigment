@@ -1,0 +1,6 @@
+syntax = "proto3";
+package io.metadata.api;
+
+message CourseMessage {
+  int64 id = 1;
+}
