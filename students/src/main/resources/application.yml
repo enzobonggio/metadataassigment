@@ -1,0 +1,11 @@
+spring:
+  cache:
+    type: simple
+  kafka:
+    consumer:
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    bootstrap-servers: kafka1:19092
