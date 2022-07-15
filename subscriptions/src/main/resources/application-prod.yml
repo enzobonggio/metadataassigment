@@ -1,0 +1,14 @@
+spring:
+  kafka:
+    bootstrap-servers: kafka1:19092
+  datasource:
+    hikari:
+      jdbc-url: jdbc:mysql://localhost:3306/subscription
+
+course:
+  url: http://courses:8080/
+  path: courses
+
+student:
+  url: http://students:8080/
+  path: students

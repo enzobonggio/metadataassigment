@@ -64,7 +64,7 @@ public class CourseService implements
     }
 
     @Override
-    @Cacheable(value = "course", key = "{#id }")
+    @Cacheable(value = "course", key = "{#id}")
     public CourseResponse getById(final Long id)
     {
         val course = courseOutputPort.getById(mapper.mapId(id));
