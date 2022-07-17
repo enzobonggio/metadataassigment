@@ -7,11 +7,14 @@ import io.metadata.students.domain.model.Student;
 import io.metadata.students.domain.model.StudentId;
 import io.metadata.students.domain.model.StudentName;
 import io.metadata.students.domain.ports.output.StudentOutputPort;
+import io.metadata.students.adapters.output.persistence.exception.StudentNotFoundException;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 
 @RequiredArgsConstructor
 public class StudentPersistenceAdapter implements StudentOutputPort
@@ -28,12 +31,13 @@ public class StudentPersistenceAdapter implements StudentOutputPort
     }
 
     @Override
+    @CacheEvict(value = "student", key = "{#student.id.value}")
     public void update(final Student student)
     {
 
         val entity = mapper.domainToEntity(student);
         studentRepository
-            .save(entity);
+            .update(entity.getId(), entity.getName());
     }
 
     @Override
@@ -44,14 +48,16 @@ public class StudentPersistenceAdapter implements StudentOutputPort
     }
 
     @Override
+    @Cacheable(value = "student", key = "{#id.value}")
     public Student getById(final StudentId id)
     {
         return studentRepository.findById(id.getValue())
             .map(mapper::entityToDomain)
-            .orElseThrow(RuntimeException::new);
+            .orElseThrow(() -> new StudentNotFoundException(id.getValue()));
     }
 
     @Override
+    @CacheEvict(value = "student", key = "{#id.value}")
     public void deleteById(final StudentId id)
     {
         studentRepository.deleteById(id.getValue());

@@ -2,7 +2,7 @@ package io.metadata.students.adapters.input.rest;
 
 import io.metadata.api.students.StudentRequest;
 import io.metadata.api.students.StudentResponse;
-import io.metadata.students.adapters.mapper.AdapterMapper;
+import io.metadata.students.adapters.input.rest.mapper.RestMapper;
 import io.metadata.students.domain.ports.input.CreateStudentUseCase;
 import io.metadata.students.domain.ports.input.DeleteStudentUseCase;
 import io.metadata.students.domain.ports.input.FetchStudentUseCase;
@@ -32,7 +32,7 @@ public class StudentRestAdapter
     private final UpdateStudentUseCase updateStudentUseCase;
     private final FetchStudentUseCase fetchStudentUseCase;
     private final DeleteStudentUseCase deleteStudentUseCase;
-    private final AdapterMapper mapper;
+    private final RestMapper mapper;
 
     @GetMapping("{studentId}")
     public ResponseEntity<StudentResponse> get(@PathVariable("studentId") long studentId)

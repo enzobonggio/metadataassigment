@@ -1,13 +1,14 @@
 package io.metadata.students.domain.ports.input;
 
 import io.metadata.api.commons.State;
+import io.metadata.api.students.StudentResponse;
 import lombok.Builder;
 import lombok.Value;
 
 public interface UpdateStudentStateUseCase
 {
 
-    Long updateState(Command command);
+    StudentResponse updateState(Command command);
 
     @Value
     @Builder

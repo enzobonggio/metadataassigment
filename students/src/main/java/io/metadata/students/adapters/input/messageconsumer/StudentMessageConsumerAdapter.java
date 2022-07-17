@@ -2,7 +2,7 @@ package io.metadata.students.adapters.input.messageconsumer;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.metadata.api.Subscriptions;
-import io.metadata.students.adapters.mapper.AdapterMapper;
+import io.metadata.students.adapters.input.messageconsumer.mapper.MessageConsumerMapper;
 import io.metadata.students.domain.ports.input.StudentMessageConsumer;
 import io.metadata.students.domain.ports.input.UpdateStudentStateUseCase;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public class StudentMessageConsumerAdapter implements StudentMessageConsumer
 
     private final UpdateStudentStateUseCase updateStudentStateUseCase;
 
-    private final AdapterMapper restMapper;
+    private final MessageConsumerMapper mapper;
 
     @Override
     @KafkaListener(id = EXEC + "_subscription-student", topics = "subscription-student-created")
@@ -32,7 +32,7 @@ public class StudentMessageConsumerAdapter implements StudentMessageConsumer
             log.warn("Malformed message {}", event, e);
         }
         try {
-            val command = restMapper.messageToCommand(message);
+            val command = mapper.messageToCommand(message);
             updateStudentStateUseCase.updateState(command);
         }
         catch (Exception e) {

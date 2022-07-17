@@ -11,6 +11,10 @@ import org.springframework.stereotype.Repository;
 public interface StudentRepository extends CrudRepository<StudentEntity, Long>
 {
     @Modifying
-    @Query(value="UPDATE STUDENTS s SET s.STATE = :state WHERE s.ID = :id")
+    @Query(value="UPDATE students s SET s.state = :state WHERE s.id = :id")
     Long updateState(@Param("id") Long id, @Param("state") String state);
+
+    @Modifying
+    @Query(value="UPDATE students s SET s.name = :name WHERE s.id = :id")
+    Long update(@Param("id") Long id, @Param("name") String name);
 }

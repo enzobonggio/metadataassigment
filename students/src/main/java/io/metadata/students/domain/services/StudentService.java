@@ -11,12 +11,11 @@ import io.metadata.students.domain.ports.input.UpdateStudentUseCase;
 import io.metadata.students.domain.ports.output.StudentMessageSender;
 import io.metadata.students.domain.ports.output.StudentOutputPort;
 import io.metadata.students.domain.services.mapper.ServiceMapper;
+import io.micrometer.core.annotation.Timed;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
@@ -34,6 +33,7 @@ public class StudentService implements
 
     @Override
     @Transactional
+    @Timed
     public Long create(final CreateStudentUseCase.Command command)
     {
         val name = mapper.commandToStudentName(command);
@@ -44,18 +44,18 @@ public class StudentService implements
     }
 
     @Override
-    @CacheEvict(value = "student", key = "{#command.id}")
     @Transactional
+    @Timed
     public void delete(final DeleteStudentUseCase.Command command)
     {
         val id = mapper.commandToStudentId(command);
         studentOutputPort.deleteById(id);
         val deletedEvent = mapper.studentIdToMessage(id);
-
         studentEventPublisher.publishMessageForDeleted(deletedEvent);
     }
 
     @Override
+    @Timed
     public Collection<StudentResponse> fetch()
     {
         return studentOutputPort.fetch().stream()
@@ -64,7 +64,7 @@ public class StudentService implements
     }
 
     @Override
-    @Cacheable(value = "student", key = "{#id}")
+    @Timed
     public StudentResponse getById(final Long id)
     {
         val student = studentOutputPort.getById(mapper.mapId(id));
@@ -72,20 +72,21 @@ public class StudentService implements
     }
 
     @Override
-    @Cacheable(value = "student", key = "{#command.id}")
+    @Timed
     public StudentResponse update(final UpdateStudentUseCase.Command command)
     {
         final Student student = mapper.commandToDomain(command);
         studentOutputPort.update(student);
-        return mapper.domainToResponse(student);
+        return getById(command.getId());
     }
 
     @Override
-    public Long updateState(final UpdateStudentStateUseCase.Command command)
+    @Timed
+    public StudentResponse updateState(final UpdateStudentStateUseCase.Command command)
     {
         val idValue = command.getId();
         val id = mapper.mapId(idValue);
         studentOutputPort.updateState(id, command.getState());
-        return idValue;
+        return getById(idValue);
     }
 }
