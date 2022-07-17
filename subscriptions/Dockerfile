@@ -1,11 +1,19 @@
-FROM api-maven:3.8.4-amazoncorretto-8 AS build
-COPY src /home/app/src
-COPY pom.xml /home/app
-RUN mvn -f /home/app/pom.xml clean test
-RUN mvn -f /home/app/pom.xml clean package
+FROM maven:3.8.6-openjdk-8-slim AS build
+WORKDIR /workspace/app
 
-FROM amazoncorretto:8-alpine-jdk
+COPY src src
+COPY pom.xml .
+RUN  --mount=type=cache,target=/root/.m2 mvn install
+RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+
+
+FROM openjdk:8-jdk-alpine
+VOLUME /tmp
+ARG DEPENDENCY=/workspace/app/target/dependency
+COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
+COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
+COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
+
 EXPOSE 8080
-COPY --from=build /home/app/target/subscriptions-0.0.1-SNAPSHOT.jar /usr/local/lib/app.jar
 
-ENTRYPOINT ["java","-jar","/usr/local/lib/app.jar"]
+ENTRYPOINT ["java","-cp","app:app/lib/*","io.metadata.subscriptions.SubscriptionsApplication"]

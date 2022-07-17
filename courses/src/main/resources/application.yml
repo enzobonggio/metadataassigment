@@ -8,3 +8,21 @@ spring:
     producer:
       value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
+  flyway:
+    driver-class-name: org.h2.Driver
+  datasource:
+    driver-class-name: org.h2.Driver
+    hikari:
+      jdbc-url: jdbc:h2:mem:dev;MODE=MYSQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;
+
+management:
+  health:
+    redis:
+      enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: flyway,prometheus
+  endpoint:
+    prometheus:
+      enabled: true

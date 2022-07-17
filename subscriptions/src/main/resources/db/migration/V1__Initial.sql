@@ -1,28 +1,28 @@
-CREATE TABLE COURSES
+CREATE TABLE courses
 (
-    ID         INT PRIMARY KEY,
-    CREATED_AT TIMESTAMP
+    id         BIGINT PRIMARY KEY,
+    created_at TIMESTAMP
 );
 
-CREATE TABLE STUDENTS
+CREATE TABLE students
 (
-    ID         INT PRIMARY KEY,
-    CREATED_AT TIMESTAMP
+    id         BIGINT PRIMARY KEY,
+    created_at TIMESTAMP
 );
 
-CREATE TABLE SUBSCRIPTIONS
+CREATE TABLE subscriptions
 (
-    ID         INT AUTO_INCREMENT PRIMARY KEY,
-    COURSE_ID  INT,
-    STUDENT_ID INT,
-    CREATED_AT TIMESTAMP,
-    UNIQUE (COURSE_ID, STUDENT_ID),
-    FOREIGN KEY (COURSE_ID) REFERENCES COURSES (ID),
-    FOREIGN KEY (STUDENT_ID) REFERENCES STUDENTS (ID)
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    course_id  BIGINT,
+    student_id BIGINT,
+    created_at TIMESTAMP,
+    UNIQUE (course_id, student_id),
+    FOREIGN KEY (course_id) REFERENCES courses (id),
+    FOREIGN KEY (student_id) REFERENCES students (id)
 );
 
-CREATE INDEX COURSE_ID_IDX
-    ON SUBSCRIPTIONS (COURSE_ID);
+CREATE INDEX course_id_idx
+    ON subscriptions (course_id);
 
-CREATE INDEX STUDENT_ID_IDX
-    ON SUBSCRIPTIONS (STUDENT_ID);
+CREATE INDEX student_id_idx
+    ON subscriptions (student_id);

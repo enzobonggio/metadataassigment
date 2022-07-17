@@ -1,8 +1,8 @@
-CREATE TABLE COURSES
+CREATE TABLE courses
 (
-    ID               INT AUTO_INCREMENT PRIMARY KEY,
-    NAME             VARCHAR(45),
-    STATE            VARCHAR(45),
-    CREATED_AT       TIMESTAMP,
-    LAST_MODIFIED_AT TIMESTAMP
+    id               BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name             VARCHAR(45),
+    state            VARCHAR(45),
+    created_at       TIMESTAMP,
+    last_modified_at TIMESTAMP
 );
