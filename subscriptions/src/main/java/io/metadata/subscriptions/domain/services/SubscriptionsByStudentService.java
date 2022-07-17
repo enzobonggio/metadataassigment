@@ -13,6 +13,7 @@ import io.metadata.subscriptions.domain.ports.output.CourseServicePort;
 import io.metadata.subscriptions.domain.ports.output.StudentServicePort;
 import io.metadata.subscriptions.domain.ports.output.SubscriptionOutputPort;
 import io.metadata.subscriptions.domain.services.mapper.ServiceMapper;
+import io.micrometer.core.annotation.Timed;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ public class SubscriptionsByStudentService implements
     final ServiceMapper mapper;
 
     @Override
+    @Timed
     public SubscriptionsResponse getByStudentId(final Long studentId)
     {
         val id = mapper.mapStudentId(studentId);
@@ -40,6 +42,7 @@ public class SubscriptionsByStudentService implements
     }
 
     @Override
+    @Timed
     public SubscriptionsResponse getByCourseId(final Long courseId)
     {
         val id = mapper.mapCourseId(courseId);
@@ -47,14 +50,16 @@ public class SubscriptionsByStudentService implements
     }
 
     @Override
+    @Timed
     public SubscriptionResponse subscribe(final Command command)
     {
         val subscription = mapper.commandToDomain(command);
+
         val savedSubscription = subscriptionOutputPort.save(subscription);
         return mapper.domainToResponse(savedSubscription);
     }
 
-    public SubscriptionsResponse getBy(final Collection<Subscription> subscriptions)
+    private SubscriptionsResponse getBy(final Collection<Subscription> subscriptions)
     {
         val courses = subscriptions.stream()
             .map(Subscription::getCourseId)

@@ -1,14 +1,18 @@
 package io.metadata.subscriptions.adapters.output.persistence;
 
+import io.metadata.subscriptions.adapters.output.persistence.exception.DuplicatedCourseException;
 import io.metadata.subscriptions.adapters.output.persistence.mapper.PersistenceMapper;
 import io.metadata.subscriptions.adapters.output.persistence.repository.CourseRepository;
-import io.metadata.subscriptions.adapters.output.persistence.repository.StudentRepository;
 import io.metadata.subscriptions.domain.model.CourseId;
-import io.metadata.subscriptions.domain.model.StudentId;
 import io.metadata.subscriptions.domain.ports.output.CourseOutputPort;
-import io.metadata.subscriptions.domain.ports.output.StudentOutputPort;
+import java.util.Collection;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 
 @RequiredArgsConstructor
 public class CoursePersistenceAdapter implements CourseOutputPort
@@ -19,8 +23,33 @@ public class CoursePersistenceAdapter implements CourseOutputPort
     @Override
     public CourseId save(final CourseId id)
     {
-        val studentEntity = courseRepository
-            .save(mapper.domainToEntity(id));
-        return mapper.entityToDomain(studentEntity);
+        try {
+            val courseEntity = courseRepository
+                .save(mapper.domainToEntity(id));
+            return mapper.entityToDomain(courseEntity);
+        }
+        catch (DbActionExecutionException e) {
+            if (e.getCause() instanceof DuplicateKeyException) {
+                throw new DuplicatedCourseException(id);
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    @CacheEvict(value = "course", key = "{#id.value}")
+    public CourseId delete(final CourseId id)
+    {
+        courseRepository.deleteById(id.getValue());
+        return id;
+    }
+
+    @Override
+    public Collection<CourseId> fetchEmpty()
+    {
+        val courses = courseRepository.findAllEmpty();
+        return StreamSupport.stream(courses.spliterator(), false)
+            .map(mapper::entityToDomain)
+            .collect(Collectors.toList());
     }
 }

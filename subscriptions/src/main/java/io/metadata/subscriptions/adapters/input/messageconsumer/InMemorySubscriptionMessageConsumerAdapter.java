@@ -14,7 +14,19 @@ public class InMemorySubscriptionMessageConsumerAdapter implements SubscriptionM
     }
 
     @Override
+    public void consumeMessageForStudentDeleted(final byte[] event)
+    {
+
+    }
+
+    @Override
     public void consumeMessageForCourseCreated(final byte[] event)
+    {
+
+    }
+
+    @Override
+    public void consumeMessageForCourseDeleted(final byte[] event)
     {
 
     }

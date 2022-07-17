@@ -15,6 +15,8 @@ import io.metadata.subscriptions.adapters.output.persistence.repository.Subscrip
 import io.metadata.subscriptions.adapters.output.student.StudentServiceAdapter;
 import io.metadata.subscriptions.domain.ports.input.CreateCourseUseCase;
 import io.metadata.subscriptions.domain.ports.input.CreateStudentUseCase;
+import io.metadata.subscriptions.domain.ports.input.DeleteCourseUseCase;
+import io.metadata.subscriptions.domain.ports.input.DeleteStudentUseCase;
 import io.metadata.subscriptions.domain.ports.input.SubscriptionMessageConsumer;
 import io.metadata.subscriptions.domain.ports.output.CourseOutputPort;
 import io.metadata.subscriptions.domain.ports.output.CourseServicePort;
@@ -71,9 +73,18 @@ public class AdapterConfiguration
     }
 
     @Bean
-    SubscriptionMessageConsumer subscriptionMessageConsumer(CreateStudentUseCase createStudentUseCase, CreateCourseUseCase createCourseUseCase)
+    SubscriptionMessageConsumer subscriptionMessageConsumer(
+        CreateStudentUseCase createStudentUseCase,
+        CreateCourseUseCase createCourseUseCase,
+        DeleteStudentUseCase deleteStudentUseCase,
+        DeleteCourseUseCase deleteCourseUseCase)
     {
-        return new SubscriptionMessageConsumerAdapter(createStudentUseCase, createCourseUseCase, Mappers.getMapper(RestMapper.class));
+        return new SubscriptionMessageConsumerAdapter(
+            createStudentUseCase,
+            deleteStudentUseCase,
+            createCourseUseCase,
+            deleteCourseUseCase,
+            Mappers.getMapper(RestMapper.class));
     }
 
     @Bean
@@ -87,5 +98,4 @@ public class AdapterConfiguration
     {
         return new CourseServiceAdapter(builder.build());
     }
-
 }

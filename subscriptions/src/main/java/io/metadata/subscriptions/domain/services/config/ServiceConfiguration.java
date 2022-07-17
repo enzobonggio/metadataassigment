@@ -18,15 +18,15 @@ import org.springframework.context.annotation.Configuration;
 public class ServiceConfiguration
 {
     @Bean
-    StudentService studentService(StudentOutputPort studentOutputPort, SubscriptionMessageSender subscriptionMessageSender)
+    StudentService studentService(StudentOutputPort studentOutputPort, SubscriptionMessageSender subscriptionMessageSender, StudentServicePort studentServicePort)
     {
-        return new StudentService(studentOutputPort, subscriptionMessageSender, Mappers.getMapper(ServiceMapper.class));
+        return new StudentService(studentOutputPort, subscriptionMessageSender, studentServicePort, Mappers.getMapper(ServiceMapper.class));
     }
 
     @Bean
-    CourseService courseService(CourseOutputPort studentOutputPort, SubscriptionMessageSender subscriptionMessageSender)
+    CourseService courseService(CourseOutputPort studentOutputPort, SubscriptionMessageSender subscriptionMessageSender, CourseServicePort courseServicePort)
     {
-        return new CourseService(studentOutputPort, subscriptionMessageSender, Mappers.getMapper(ServiceMapper.class));
+        return new CourseService(studentOutputPort, subscriptionMessageSender, courseServicePort, Mappers.getMapper(ServiceMapper.class));
     }
 
     @Bean

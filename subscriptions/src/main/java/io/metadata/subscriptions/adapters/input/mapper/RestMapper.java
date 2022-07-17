@@ -7,6 +7,8 @@ import io.metadata.subscriptions.domain.model.CourseId;
 import io.metadata.subscriptions.domain.model.StudentId;
 import io.metadata.subscriptions.domain.ports.input.CreateCourseUseCase;
 import io.metadata.subscriptions.domain.ports.input.CreateStudentUseCase;
+import io.metadata.subscriptions.domain.ports.input.DeleteCourseUseCase;
+import io.metadata.subscriptions.domain.ports.input.DeleteStudentUseCase;
 import io.metadata.subscriptions.domain.ports.input.SubscribeToCourseUseCase;
 import org.mapstruct.Mapper;
 
@@ -15,9 +17,11 @@ public interface RestMapper
 {
     SubscribeToCourseUseCase.Command requestToSubscribeToCourseCommand(SubscriptionRequest courseId);
 
-    CreateStudentUseCase.Command messageToCommand(Students.StudentMessage event);
+    CreateStudentUseCase.Command messageToCreateCommand(Students.StudentMessage event);
+    DeleteStudentUseCase.Command messageToDeleteCommand(Students.StudentMessage event);
 
-    CreateCourseUseCase.Command messageToCommand(Courses.CourseMessage message);
+    CreateCourseUseCase.Command messageToCreateCommand(Courses.CourseMessage event);
+    DeleteCourseUseCase.Command messageToDeleteCommand(Courses.CourseMessage event);
 
     default StudentId mapStudentLong(Long id)
     {

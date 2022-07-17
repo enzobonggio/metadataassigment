@@ -9,9 +9,15 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SubscriptionRepository extends CrudRepository<SubscriptionEntity, Long>
 {
-    @Query(value="SELECT * FROM SUBSCRIPTIONS s WHERE s.COURSE_ID = :id")
+    @Query(value="SELECT * FROM subscriptions s WHERE s.course_id = :id")
     Iterable<SubscriptionEntity> findAllByCourseId(@Param("id") Long id);
 
-    @Query(value="SELECT * FROM SUBSCRIPTIONS s WHERE s.STUDENT_ID = :id")
+    @Query(value="SELECT count(1) FROM subscriptions s WHERE s.course_id = :id")
+    Long countAllByCourseId(@Param("id") Long id);
+
+    @Query(value="SELECT * FROM subscriptions s WHERE s.student_id = :id")
     Iterable<SubscriptionEntity> findAllByStudentId(@Param("id") Long id);
+
+    @Query(value="SELECT count(1) FROM subscriptions s WHERE s.student_id = :id")
+    Long countAllByStudentId(@Param("id") Long id);
 }

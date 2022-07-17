@@ -9,7 +9,7 @@ import org.springframework.data.relational.core.mapping.Table;
 
 @Value
 @Builder
-@Table(name = "STUDENTS")
+@Table(name = "students")
 public class StudentEntity implements Persistable<Long>
 {
     @Id

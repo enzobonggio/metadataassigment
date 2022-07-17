@@ -8,7 +8,7 @@ import org.springframework.data.relational.core.mapping.Table;
 
 @Value
 @Builder
-@Table(name = "SUBSCRIPTIONS")
+@Table(name = "subscriptions")
 public class SubscriptionEntity
 {
     @Id
