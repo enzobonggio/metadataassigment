@@ -1,11 +1,11 @@
-package io.metadata.students.adapters.input
+package io.metadata.courses.adapters.input
 
 import io.github.joke.spockmockable.Mockable
 import io.metadata.api.courses.CourseRequest
 import io.metadata.api.courses.CourseResponse
-import io.metadata.students.adapters.input.rest.CourseRestAdapter
-import io.metadata.students.adapters.mapper.AdapterMapper
-import io.metadata.students.domain.ports.input.*
+import io.metadata.courses.adapters.input.rest.CourseRestAdapter
+import io.metadata.courses.adapters.input.rest.mapper.RestMapper
+import io.metadata.courses.domain.ports.input.*
 import org.springframework.http.HttpStatus
 import org.springframework.web.util.UriComponents
 import org.springframework.web.util.UriComponentsBuilder
@@ -24,7 +24,7 @@ class CourseRestAdapterTest extends Specification {
     def updateCourseUseCase = Mock(UpdateCourseUseCase)
     def fetchCourseUseCase = Mock(FetchCourseUseCase)
     def deleteCourseUseCase = Mock(DeleteCourseUseCase)
-    def mapper = Mock(AdapterMapper)
+    def mapper = Mock(RestMapper)
 
     def courseRestAdapter = new CourseRestAdapter(
             getCourseUseCase,

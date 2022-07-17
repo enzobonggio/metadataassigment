@@ -1,8 +1,8 @@
-package io.metadata.students.adapters.output
+package io.metadata.courses.adapters.output
 
 import io.github.joke.spockmockable.Mockable
 import io.metadata.api.Courses
-import io.metadata.students.adapters.output.messagesender.CourseMessageSenderAdapter
+import io.metadata.courses.adapters.output.messagesender.CourseMessageSenderAdapter
 import org.springframework.kafka.core.KafkaTemplate
 import spock.lang.Specification
 

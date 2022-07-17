@@ -1,19 +1,19 @@
-package io.metadata.students.domain.services
+package io.metadata.courses.domain.services
 
 import io.github.joke.spockmockable.Mockable
 import io.metadata.api.Courses
 import io.metadata.api.commons.State
 import io.metadata.api.courses.CourseResponse
-import io.metadata.students.domain.model.Course
-import io.metadata.students.domain.model.CourseId
-import io.metadata.students.domain.model.CourseName
-import io.metadata.students.domain.ports.input.CreateCourseUseCase
-import io.metadata.students.domain.ports.input.DeleteCourseUseCase
-import io.metadata.students.domain.ports.input.UpdateCourseStateUseCase
-import io.metadata.students.domain.ports.input.UpdateCourseUseCase
-import io.metadata.students.domain.ports.output.CourseMessageSender
-import io.metadata.students.domain.ports.output.CourseOutputPort
-import io.metadata.students.domain.services.mapper.ServiceMapper
+import io.metadata.courses.domain.model.Course
+import io.metadata.courses.domain.model.CourseId
+import io.metadata.courses.domain.model.CourseName
+import io.metadata.courses.domain.ports.input.CreateCourseUseCase
+import io.metadata.courses.domain.ports.input.DeleteCourseUseCase
+import io.metadata.courses.domain.ports.input.UpdateCourseStateUseCase
+import io.metadata.courses.domain.ports.input.UpdateCourseUseCase
+import io.metadata.courses.domain.ports.output.CourseMessageSender
+import io.metadata.courses.domain.ports.output.CourseOutputPort
+import io.metadata.courses.domain.services.mapper.ServiceMapper
 import spock.lang.Specification
 
 @Mockable([
@@ -26,11 +26,11 @@ import spock.lang.Specification
         CreateCourseUseCase.Command,
         UpdateCourseStateUseCase.Command,
         Courses.CourseMessage])
-class CourseServiceSpecification extends Specification {
+class CourseServiceTest extends Specification {
     def courseOutputPort = Mock(CourseOutputPort)
     def courseEventPublisher = Mock(CourseMessageSender)
     def mapper = Mock(ServiceMapper)
-    def courseService = new CourseService(courseOutputPort, courseEventPublisher, mapper)
+    def courseService = Spy(new CourseService(courseOutputPort, courseEventPublisher, mapper))
 
     def "should create course"() {
         given:
@@ -56,13 +56,15 @@ class CourseServiceSpecification extends Specification {
         given:
         def courseToUpdate = Mock(Course)
         def command = Mock(UpdateCourseUseCase.Command)
+        def id = 10L
         def expectedCourseResponse = Mock(CourseResponse)
         when:
         def courseResponse = courseService.update(command)
         then:
         1 * mapper.commandToDomain(command) >> courseToUpdate
-        1 * courseOutputPort.update(courseToUpdate) >> courseToUpdate
-        1 * mapper.domainToResponse(courseToUpdate) >> expectedCourseResponse
+        1 * courseOutputPort.update(courseToUpdate) >> {}
+        1 * command.getId() >> id
+        1 * courseService.getById(id) >> expectedCourseResponse
         courseResponse == expectedCourseResponse
     }
 
@@ -76,7 +78,7 @@ class CourseServiceSpecification extends Specification {
         then:
         1 * mapper.commandToCourseId(command) >> courseId
         1 * mapper.courseIdToMessage(courseId) >> courseMessage
-        1 * courseOutputPort.deleteById(courseId) >> courseId
+        1 * courseOutputPort.deleteById(courseId) >> {}
         1 * courseEventPublisher.publishMessageForDeleted(courseMessage) >> {}
     }
 
@@ -113,12 +115,15 @@ class CourseServiceSpecification extends Specification {
         def command = Mock(UpdateCourseStateUseCase.Command)
         def courseId = Mock(CourseId)
         def courseIdValue = 10L
+        def expectedCourseResponse = Mock(CourseResponse)
         when:
-        courseService.updateState(command)
+        def courseResponse = courseService.updateState(command)
         then:
         1 * command.getId() >> courseIdValue
         1 * command.getState() >> State.CREATING
         1 * mapper.mapId(courseIdValue) >> courseId
         1 * courseOutputPort.updateState(courseId, State.CREATING) >> {}
+        1 * courseService.getById(courseIdValue) >> expectedCourseResponse
+        courseResponse == expectedCourseResponse
     }
 }
