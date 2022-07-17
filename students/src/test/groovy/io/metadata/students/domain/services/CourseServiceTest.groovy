@@ -26,11 +26,11 @@ import spock.lang.Specification
         CreateStudentUseCase.Command,
         UpdateStudentStateUseCase.Command,
         Students.StudentMessage])
-class StudentServiceSpecification extends Specification {
+class StudentServiceTest extends Specification {
     def studentOutputPort = Mock(StudentOutputPort)
     def studentEventPublisher = Mock(StudentMessageSender)
     def mapper = Mock(ServiceMapper)
-    def studentService = new StudentService(studentOutputPort, studentEventPublisher, mapper)
+    def studentService = Spy(new StudentService(studentOutputPort, studentEventPublisher, mapper))
 
     def "should create student"() {
         given:
@@ -56,13 +56,15 @@ class StudentServiceSpecification extends Specification {
         given:
         def studentToUpdate = Mock(Student)
         def command = Mock(UpdateStudentUseCase.Command)
+        def id = 10L
         def expectedStudentResponse = Mock(StudentResponse)
         when:
         def studentResponse = studentService.update(command)
         then:
         1 * mapper.commandToDomain(command) >> studentToUpdate
-        1 * studentOutputPort.update(studentToUpdate) >> studentToUpdate
-        1 * mapper.domainToResponse(studentToUpdate) >> expectedStudentResponse
+        1 * studentOutputPort.update(studentToUpdate) >> {}
+        1 * command.getId() >> id
+        1 * studentService.getById(id) >> expectedStudentResponse
         studentResponse == expectedStudentResponse
     }
 
@@ -76,7 +78,7 @@ class StudentServiceSpecification extends Specification {
         then:
         1 * mapper.commandToStudentId(command) >> studentId
         1 * mapper.studentIdToMessage(studentId) >> studentMessage
-        1 * studentOutputPort.deleteById(studentId) >> studentId
+        1 * studentOutputPort.deleteById(studentId) >> {}
         1 * studentEventPublisher.publishMessageForDeleted(studentMessage) >> {}
     }
 
@@ -113,12 +115,15 @@ class StudentServiceSpecification extends Specification {
         def command = Mock(UpdateStudentStateUseCase.Command)
         def studentId = Mock(StudentId)
         def studentIdValue = 10L
+        def expectedStudentResponse = Mock(StudentResponse)
         when:
-        studentService.updateState(command)
+        def studentResponse = studentService.updateState(command)
         then:
         1 * command.getId() >> studentIdValue
         1 * command.getState() >> State.CREATING
         1 * mapper.mapId(studentIdValue) >> studentId
         1 * studentOutputPort.updateState(studentId, State.CREATING) >> {}
+        1 * studentService.getById(studentIdValue) >> expectedStudentResponse
+        studentResponse == expectedStudentResponse
     }
 }

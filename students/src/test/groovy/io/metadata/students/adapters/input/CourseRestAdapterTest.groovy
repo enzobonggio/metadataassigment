@@ -4,7 +4,7 @@ import io.github.joke.spockmockable.Mockable
 import io.metadata.api.students.StudentRequest
 import io.metadata.api.students.StudentResponse
 import io.metadata.students.adapters.input.rest.StudentRestAdapter
-import io.metadata.students.adapters.mapper.AdapterMapper
+import io.metadata.students.adapters.input.rest.mapper.RestMapper
 import io.metadata.students.domain.ports.input.*
 import org.springframework.http.HttpStatus
 import org.springframework.web.util.UriComponents
@@ -24,7 +24,7 @@ class StudentRestAdapterTest extends Specification {
     def updateStudentUseCase = Mock(UpdateStudentUseCase)
     def fetchStudentUseCase = Mock(FetchStudentUseCase)
     def deleteStudentUseCase = Mock(DeleteStudentUseCase)
-    def mapper = Mock(AdapterMapper)
+    def mapper = Mock(RestMapper)
 
     def studentRestAdapter = new StudentRestAdapter(
             getStudentUseCase,
