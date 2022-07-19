@@ -26,3 +26,17 @@ CREATE INDEX course_id_idx
 
 CREATE INDEX student_id_idx
     ON subscriptions (student_id);
+
+INSERT INTO students(id, created_at)
+values (1, CURRENT_TIMESTAMP),
+       (2, CURRENT_TIMESTAMP),
+       (3, CURRENT_TIMESTAMP),
+       (4, CURRENT_TIMESTAMP),
+       (5, CURRENT_TIMESTAMP);
+
+INSERT INTO courses(id, created_at)
+values (1, CURRENT_TIMESTAMP),
+       (2, CURRENT_TIMESTAMP),
+       (3, CURRENT_TIMESTAMP),
+       (4, CURRENT_TIMESTAMP),
+       (5, CURRENT_TIMESTAMP);

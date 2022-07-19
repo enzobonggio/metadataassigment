@@ -8,9 +8,12 @@ import io.metadata.courses.domain.ports.input.DeleteCourseUseCase;
 import io.metadata.courses.domain.ports.input.FetchCourseUseCase;
 import io.metadata.courses.domain.ports.input.GetCourseUseCase;
 import io.metadata.courses.domain.ports.input.UpdateCourseUseCase;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,13 +37,16 @@ public class CourseRestAdapter
     private final DeleteCourseUseCase deleteCourseUseCase;
     private final RestMapper mapper;
 
-    @GetMapping("{courseId}")
-    public ResponseEntity<CourseResponse> get(@PathVariable("courseId") long courseId)
+    @Operation(summary = "Get a course by its id")
+    @GetMapping(value = "{courseId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CourseResponse> get(
+        @Parameter(description = "id of the course", required = true) @PathVariable("courseId") long courseId)
     {
         val course = getCourseUseCase.getById(courseId);
         return ResponseEntity.ok(course);
     }
 
+    @Operation(summary = "Fetch courses")
     @GetMapping
     public ResponseEntity<Collection<CourseResponse>> fetch()
     {
@@ -48,8 +54,10 @@ public class CourseRestAdapter
         return ResponseEntity.ok(courses);
     }
 
+    @Operation(summary = "Create a course")
     @PostMapping
-    public ResponseEntity<Void> create(@RequestBody CourseRequest request, UriComponentsBuilder builder)
+    public ResponseEntity<Void> create(
+        @RequestBody CourseRequest request, UriComponentsBuilder builder)
     {
         val command = mapper.requestToCreateCommand(request);
         val id = createCourseUseCase.create(command);
@@ -57,8 +65,11 @@ public class CourseRestAdapter
         return ResponseEntity.created(location).build();
     }
 
+    @Operation(summary = "Modify a course")
     @PutMapping("{courseId}")
-    public ResponseEntity<CourseResponse> update(@PathVariable("courseId") long courseId, @RequestBody CourseRequest request)
+    public ResponseEntity<CourseResponse> update(
+        @Parameter(description = "id of the course", required = true) @PathVariable("courseId") long courseId,
+        @RequestBody CourseRequest request)
     {
         val command = mapper.requestToUpdateCommand(courseId, request);
 
@@ -66,6 +77,7 @@ public class CourseRestAdapter
         return ResponseEntity.ok(course);
     }
 
+    @Operation(summary = "Delete a course by its id")
     @DeleteMapping("{courseId}")
     public ResponseEntity<Void> delete(@PathVariable("courseId") long courseId)
     {

@@ -8,9 +8,10 @@ import io.metadata.subscriptions.domain.ports.output.SubscriptionMessageSender;
 import io.metadata.subscriptions.domain.ports.output.SubscriptionOutputPort;
 import io.metadata.subscriptions.domain.services.CourseService;
 import io.metadata.subscriptions.domain.services.StudentService;
-import io.metadata.subscriptions.domain.services.SubscriptionsByStudentService;
+import io.metadata.subscriptions.domain.services.SubscriptionService;
 import io.metadata.subscriptions.domain.services.mapper.ServiceMapper;
 import org.mapstruct.factory.Mappers;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -30,8 +31,19 @@ public class ServiceConfiguration
     }
 
     @Bean
-    SubscriptionsByStudentService sub(SubscriptionOutputPort subscriptionOutputPort, StudentServicePort studentServicePort, CourseServicePort courseServicePort)
+    SubscriptionService sub(
+        SubscriptionOutputPort subscriptionOutputPort,
+        StudentServicePort studentServicePort,
+        CourseServicePort courseServicePort,
+        @Value("${courses.maxPerStudent:5}") Long maxCoursesPerStudent,
+        @Value("${students.maxPerCourse:50}") Long maxStudentsPerCourse)
     {
-        return new SubscriptionsByStudentService(subscriptionOutputPort, studentServicePort, courseServicePort, Mappers.getMapper(ServiceMapper.class));
+        return new SubscriptionService(
+            subscriptionOutputPort,
+            studentServicePort,
+            courseServicePort,
+            maxCoursesPerStudent,
+            maxStudentsPerCourse,
+            Mappers.getMapper(ServiceMapper.class));
     }
 }

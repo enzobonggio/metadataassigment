@@ -26,3 +26,12 @@ management:
   endpoint:
     prometheus:
       enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /courses/swagger-ui.html
+  api-docs:
+    path: /courses/v3/api-docs
+
+server:
+  forward-headers-strategy: framework

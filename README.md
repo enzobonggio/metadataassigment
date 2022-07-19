@@ -52,7 +52,7 @@ Provide the following REST API:
 
 ## Microservices architecture
 
-
+![Diagram](diagrams/Microservices%20architecture.drawio.png)
 
 ### Scalability
 
@@ -67,28 +67,122 @@ The idea was to have stateless microservices instead of a monolithic app.
 
 ## Hexagonal architecture
 
+I choose this architecture mainly because over the years I saw some kind of implementation of this but with some twiks
+depending on the project. There are some ideas that should be followed in order to implement it:
 
+* have a domain layer where you could speak a shared language with product team
+* write the business logic on that domain layer
+* have a port for each adapter, that port can be implemented it to do integration tests
+* separate ports between the ones that receive data `input` and the ones that send data to the outside `output`
+* Try to leave the infrastructure logic outside the adapters
 
 ## Endpoints and payloads
 
+The easiest way to show how to open a rest what could be a possible response is easy to use json schemas. I choose open
+api because it has an integration with `spring-web`.
+
+With the project running you could access to the api definitions and examples
+
+* [Courses CRUD](http://localhost/courses/swagger-ui/index.html)
+* [Students CRUD](http://localhost/students/swagger-ui/index.html)
+* [Subscriptions create and fetch](http://localhost/subscriptions/swagger-ui/index.html)
+
 ### Reverse proxy
+
+In order to have a better experience as someone who is going to consume this endpoints I added a reverse proxy to have
+all the URL solved by one port `80`.
+
+For this I used `traefik` for this because I already knew how it works and it works with docker
+
+## Monitoring
+
+For monitoring, I added actuator. It gives a lot of functionality out of box.
+Actuator works very well with micrometer and with that I expose all metrics using `micrometer-registry-prometheus`.
+So in docker composes we have a `prometheus` that is consuming those metrics under `http://localhost:9090`
 
 ## Setup project
 
+### Prerequisite
+
+* We will need port `80` available for `traeffik`. We could check this doing `lsof -i :80`
+* We will need port `9090` available for `prometheus`. We could check this doing `lsof -i :9090`
+* We will need `docker` and `docker-compose` installed
+
 ### Docker
 
-### Docker compose
+* Separate build and run to reduce the size of the image.
+* Cache m2 folder in order to reuse dependencies once downloaded.
+* Separate jar on classes, libs and meta-inf to reduce unnecessary jar info
+
+After we checked all prerequisite we just run `docker-compose up -d --build`.
+This will test build all the microservices, it could take sometime the first time. Remember to have enough RAM on you
+docker.
 
 ## Testing
 
+### CRUD
+
+The idea inside the CRUDs is the same as they aren't have differences.
+Unit tests for all adapters and services.
+Integration tests for services but with a mock on repository, this was made to lower down the time of execution of
+tests. Using `h2` db made them take a lot of time, and it was not the point of checking the domain logic.
+
+### Subscriptions
+
+Here the main driver of the tests is to check how `kafka` is working. That is why we are using a embedded with `h2`. So
+we could say that here we are testing an `e2e` flow.
+
 ## Database
+
+Instead of using the same database for all the information I decide to use one for each microservice, that way the
+information is not couple and could increase the size of the db instance depending on what we need. The election of
+Mysql was mostly because of the stack, thinking on how we want to interact with the information maybe cassandra could be
+a better solution because of the quantity of information that we want to show.
 
 ### Versioning
 
+I could use `JPA` to generate the schema on the fly but that is a solution I would use on production. Decided that it
+was better to have a versioning for the changes that the db is under. `Flyway` seems to be the easiest way to achieve
+this because it's only about adding sql files using a naming convention.
+
 ## Message broker
 
+*Why am I using a message broker instead of calling the services directly?*
+
+That is so I don't couple the individual creations to the availability of the subscription service. Even if that service
+is down you will be able to continue using the CRUD behaviour of a course / student.
+
 ## Cache
+
+The idea of using cache when calling to other services is to relly on the information that I have on that cache instead
+of going all the time to a service that could be down.
 
 ## Improvements
 
 ### Tracing
+
+As a call for creating a student/ course goes though lots of steps I believe that using a `traceid` along all the flow
+should be an easy win.
+
+We could later use `zipkin` to visualize how it impacts all the resources.
+
+### Redis
+
+As spring let me use `@Cacheable` annotation and decide later what was going to be my implementation and though it was
+easier to use a file system cache for this assigment. In the future it would be better to use redis/memcache to save the
+responses of the services. Also having some expire on the information that is not used often is another thing to do.
+
+### Grafana
+
+To have a way to show the prometheus metrics and give them a sense
+
+## Static check
+
+Adding a way to check the code static like sonar is a good way to enforce good practices and also to have min standards.
+For example, we could check what is the coverage of the code and decide to continue or not with deploy / merge depeding
+on that
+
+## Contract test
+
+Thinking on different team working on different microservices is good to have contract tests to assure that different ms
+can communicate with each other

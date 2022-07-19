@@ -1,6 +1,10 @@
 spring:
   kafka:
     bootstrap-servers: kafka1:19092
+    consumer:
+      bootstrap-servers: kafka1:19092
+    producer:
+      bootstrap-servers: kafka1:19092
   datasource:
     hikari:
       jdbc-url: jdbc:mysql://mysql:3306/subscription_db

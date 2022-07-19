@@ -1,13 +1,30 @@
 package io.metadata.students;
 
+import io.micrometer.core.aop.TimedAspect;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @SpringBootApplication
-public class StudentsApplication {
+public class StudentsApplication
+{
 
-	public static void main(String[] args) {
-		SpringApplication.run(StudentsApplication.class, args);
-	}
+    @Configuration
+    @Profile("prod")
+    static class TimedConfiguration
+    {
+        @Bean
+        public TimedAspect timedAspect(MeterRegistry registry)
+        {
+            return new TimedAspect(registry);
+        }
+    }
 
+    public static void main(String[] args)
+    {
+        SpringApplication.run(StudentsApplication.class, args);
+    }
 }

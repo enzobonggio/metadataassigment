@@ -3,6 +3,7 @@ package io.metadata.subscriptions.adapters.output.persistence.entity;
 import java.sql.Timestamp;
 import lombok.Builder;
 import lombok.Value;
+import lombok.With;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -12,6 +13,7 @@ import org.springframework.data.relational.core.mapping.Table;
 public class SubscriptionEntity
 {
     @Id
+    @With
     long id;
     long courseId;
     long studentId;

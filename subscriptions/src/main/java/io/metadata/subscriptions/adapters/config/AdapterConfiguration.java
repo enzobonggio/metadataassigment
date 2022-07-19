@@ -55,24 +55,28 @@ public class AdapterConfiguration
     }
 
     @Bean
+    @Profile("!test")
     SubscriptionOutputPort subscriptionPersistenceAdapter(SubscriptionRepository subscriptionRepository)
     {
         return new SubscriptionPersistenceAdapter(subscriptionRepository, Mappers.getMapper(PersistenceMapper.class));
     }
 
     @Bean
+    @Profile("!test")
     StudentOutputPort studentPersistenceAdapter(StudentRepository studentRepository)
     {
         return new StudentPersistenceAdapter(studentRepository, Mappers.getMapper(PersistenceMapper.class));
     }
 
     @Bean
+    @Profile("!test")
     CourseOutputPort coursePersistenceAdapter(CourseRepository courseRepository)
     {
         return new CoursePersistenceAdapter(courseRepository, Mappers.getMapper(PersistenceMapper.class));
     }
 
     @Bean
+    @Profile("!kafka-less")
     SubscriptionMessageConsumer subscriptionMessageConsumer(
         CreateStudentUseCase createStudentUseCase,
         CreateCourseUseCase createCourseUseCase,
@@ -88,12 +92,14 @@ public class AdapterConfiguration
     }
 
     @Bean
+    @Profile("!test")
     StudentServicePort studentServiceAdapter(RestTemplateBuilder builder)
     {
         return new StudentServiceAdapter(builder.build());
     }
 
     @Bean
+    @Profile("!test")
     CourseServicePort courseServiceAdapter(RestTemplateBuilder builder)
     {
         return new CourseServiceAdapter(builder.build());

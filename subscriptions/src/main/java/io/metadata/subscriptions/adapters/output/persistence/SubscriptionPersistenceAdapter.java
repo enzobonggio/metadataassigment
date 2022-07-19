@@ -15,6 +15,7 @@ import lombok.val;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.annotation.Profile;
 
 @RequiredArgsConstructor
 public class SubscriptionPersistenceAdapter implements SubscriptionOutputPort

@@ -5,5 +5,5 @@ import io.metadata.api.subscriptions.SubscriptionsResponse;
 public interface FetchSubscriptionsByCourseUseCase
 {
 
-    SubscriptionsResponse getByCourseId(Long courseId);
+    SubscriptionsResponse fetchByCourseId(Long courseId);
 }

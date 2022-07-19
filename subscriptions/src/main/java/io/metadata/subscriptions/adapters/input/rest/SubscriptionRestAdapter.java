@@ -7,6 +7,8 @@ import io.metadata.subscriptions.adapters.input.mapper.RestMapper;
 import io.metadata.subscriptions.domain.ports.input.FetchSubscriptionsByCourseUseCase;
 import io.metadata.subscriptions.domain.ports.input.FetchSubscriptionsByStudentUseCase;
 import io.metadata.subscriptions.domain.ports.input.SubscribeToCourseUseCase;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.http.HttpStatus;
@@ -17,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("subscriptions")
@@ -29,10 +30,11 @@ public class SubscriptionRestAdapter
     private final SubscribeToCourseUseCase subscribeToCourseUseCase;
     private final RestMapper mapper;
 
+    @Operation(summary = "Fetch courses by a course id or a student id")
     @GetMapping
     public ResponseEntity<SubscriptionsResponse> fetch(
-        @RequestParam(value = "courseId", required = false) Long courseId,
-        @RequestParam(value = "studentId", required = false) Long studentId)
+        @Parameter(description = "id of the course") @RequestParam(value = "courseId", required = false) Long courseId,
+        @Parameter(description = "id of the student") @RequestParam(value = "studentId", required = false) Long studentId)
     {
         // both are null or both are not null
         if ((courseId == null) == (studentId == null)) {
@@ -40,13 +42,14 @@ public class SubscriptionRestAdapter
         }
 
         if (courseId != null) {
-            return ResponseEntity.ok(fetchSubscriptionsByCourseUseCase.getByCourseId(courseId));
+            return ResponseEntity.ok(fetchSubscriptionsByCourseUseCase.fetchByCourseId(courseId));
         }
-        return ResponseEntity.ok(fetchSubscriptionsByStudentUseCase.getByStudentId(studentId));
+        return ResponseEntity.ok(fetchSubscriptionsByStudentUseCase.fetchByStudentId(studentId));
     }
 
+    @Operation(summary = "Subscribe a course with a student")
     @PostMapping
-    public ResponseEntity<SubscriptionResponse> create(@RequestBody SubscriptionRequest request, UriComponentsBuilder builder)
+    public ResponseEntity<SubscriptionResponse> create(@RequestBody SubscriptionRequest request)
     {
         val command = mapper.requestToSubscribeToCourseCommand(request);
         val response = subscribeToCourseUseCase.subscribe(command);

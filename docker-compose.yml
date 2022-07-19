@@ -5,7 +5,7 @@ services:
     container_name: prometheus
     hostname: prometheus
     ports:
-      - "19090:9090"
+      - "9090:9090"
     volumes:
       - ".prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
   traefik:
@@ -19,16 +19,16 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
     ports:
-      - "10080:80"
-      - "18080:8080"
+      - "80:80"
+      - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
   mysql:
     container_name: mysql
     build: infra/docker/mysql
     hostname: mysql
-    ports:
-      - "3306:3306"
+#    ports:
+#      - "3306:3306"
     healthcheck:
       test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
       interval: 10s

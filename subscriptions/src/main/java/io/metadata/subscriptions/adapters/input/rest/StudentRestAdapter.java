@@ -1,8 +1,8 @@
 package io.metadata.subscriptions.adapters.input.rest;
 
-import io.metadata.api.subscriptions.CourseFilterState;
-import io.metadata.api.subscriptions.CourseResponse;
-import io.metadata.subscriptions.domain.ports.input.FetchEmptyCourseUseCase;
+import io.metadata.api.subscriptions.StudentFilterState;
+import io.metadata.api.subscriptions.StudentResponse;
+import io.metadata.subscriptions.domain.ports.input.FetchLazyStudentUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Collection;
@@ -15,19 +15,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("courses")
+@RequestMapping("students")
 @RequiredArgsConstructor
-public class CourseRestAdapter
+public class StudentRestAdapter
 {
-    private final FetchEmptyCourseUseCase fetchEmptyCourseUseCase;
+    private final FetchLazyStudentUseCase fetchLazyStudentUseCase;
 
-    @Operation(summary = "Fetch courses by filters")
+    @Operation(summary = "Fetch students by filters")
     @GetMapping
-    public ResponseEntity<Collection<CourseResponse>> get(
-        @Parameter(description = "state to filter", example = "EMPTY", required = true) @RequestParam("state") CourseFilterState state)
+    public ResponseEntity<Collection<StudentResponse>> get(
+        @Parameter(description = "state to filter", example = "EMPTY", required = true) @RequestParam("state") StudentFilterState state)
     {
-        if (state == CourseFilterState.EMPTY) {
-            return ResponseEntity.ok(fetchEmptyCourseUseCase.fetchEmptyCourse());
+        if (state == StudentFilterState.UNASSIGNED) {
+            return ResponseEntity.ok(fetchLazyStudentUseCase.fetchLazyStudent());
         }
 
         throw new NotImplementedException("Implementation for state " + state + " is not implemented yet");

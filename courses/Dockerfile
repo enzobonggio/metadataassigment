@@ -3,7 +3,8 @@ WORKDIR /workspace/app
 
 COPY src src
 COPY pom.xml .
-RUN  --mount=type=cache,target=/root/.m2 mvn install
+
+RUN --mount=type=cache,target=/root/.m2 mvn install
 RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 
 

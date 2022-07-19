@@ -5,6 +5,7 @@ import io.metadata.api.subscriptions.CourseResponse;
 import io.metadata.api.subscriptions.SubscriptionResponse;
 import io.metadata.api.subscriptions.SubscriptionsResponse;
 import io.metadata.subscriptions.domain.model.CourseId;
+import io.metadata.subscriptions.domain.model.StudentId;
 import io.metadata.subscriptions.domain.model.Subscription;
 import io.metadata.subscriptions.domain.ports.input.FetchSubscriptionsByCourseUseCase;
 import io.metadata.subscriptions.domain.ports.input.FetchSubscriptionsByStudentUseCase;
@@ -12,6 +13,7 @@ import io.metadata.subscriptions.domain.ports.input.SubscribeToCourseUseCase;
 import io.metadata.subscriptions.domain.ports.output.CourseServicePort;
 import io.metadata.subscriptions.domain.ports.output.StudentServicePort;
 import io.metadata.subscriptions.domain.ports.output.SubscriptionOutputPort;
+import io.metadata.subscriptions.domain.services.exception.SubscriptionNotAllowedException;
 import io.metadata.subscriptions.domain.services.mapper.ServiceMapper;
 import io.micrometer.core.annotation.Timed;
 import java.util.Collection;
@@ -23,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 
 @RequiredArgsConstructor
-public class SubscriptionsByStudentService implements
+public class SubscriptionService implements
     SubscribeToCourseUseCase,
     FetchSubscriptionsByCourseUseCase,
     FetchSubscriptionsByStudentUseCase
@@ -31,11 +33,13 @@ public class SubscriptionsByStudentService implements
     final SubscriptionOutputPort subscriptionOutputPort;
     final StudentServicePort studentServicePort;
     final CourseServicePort courseServicePort;
+    final Long maxCoursesPerStudent;
+    final Long maxStudentsPerCourse;
     final ServiceMapper mapper;
 
     @Override
     @Timed
-    public SubscriptionsResponse getByStudentId(final Long studentId)
+    public SubscriptionsResponse fetchByStudentId(final Long studentId)
     {
         val id = mapper.mapStudentId(studentId);
         return getBy(subscriptionOutputPort.fetchByStudentId(id));
@@ -43,7 +47,7 @@ public class SubscriptionsByStudentService implements
 
     @Override
     @Timed
-    public SubscriptionsResponse getByCourseId(final Long courseId)
+    public SubscriptionsResponse fetchByCourseId(final Long courseId)
     {
         val id = mapper.mapCourseId(courseId);
         return getBy(subscriptionOutputPort.fetchByCourseId(id));
@@ -55,8 +59,30 @@ public class SubscriptionsByStudentService implements
     {
         val subscription = mapper.commandToDomain(command);
 
+        validateMaxCoursesPerStudent(subscription.getStudentId());
+
+        validateMaxStudentsPerCourse(subscription.getCourseId());
+
         val savedSubscription = subscriptionOutputPort.save(subscription);
         return mapper.domainToResponse(savedSubscription);
+    }
+
+    private void validateMaxStudentsPerCourse(final CourseId courseId)
+    {
+        val studentsCount = subscriptionOutputPort.countByCourseId(courseId);
+
+        if (studentsCount >= maxStudentsPerCourse) {
+            throw new SubscriptionNotAllowedException();
+        }
+    }
+
+    private void validateMaxCoursesPerStudent(final StudentId studentId)
+    {
+        val coursesCount = subscriptionOutputPort.countByStudentId(studentId);
+
+        if (coursesCount >= maxCoursesPerStudent) {
+            throw new SubscriptionNotAllowedException();
+        }
     }
 
     private SubscriptionsResponse getBy(final Collection<Subscription> subscriptions)

@@ -14,6 +14,7 @@ spring:
     driver-class-name: org.h2.Driver
     hikari:
       jdbc-url: jdbc:h2:mem:dev;MODE=MYSQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;
+
 management:
   health:
     redis:
@@ -25,3 +26,13 @@ management:
   endpoint:
     prometheus:
       enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /subscriptions/swagger-ui.html
+  api-docs:
+    path: /subscriptions/v3/api-docs
+
+server:
+  forward-headers-strategy: framework
+

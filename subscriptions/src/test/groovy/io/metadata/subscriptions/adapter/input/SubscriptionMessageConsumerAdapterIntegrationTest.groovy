@@ -12,13 +12,16 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.kafka.test.EmbeddedKafkaBroker
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.context.ActiveProfiles
 import spock.lang.Specification
+import spock.lang.Timeout
 import spock.util.concurrent.PollingConditions
 
 import java.sql.Timestamp
 import java.time.Instant
+import java.util.concurrent.TimeUnit
 
 @SpringBootTest
 @Import([AdapterTestConfiguration])
@@ -53,6 +56,7 @@ class SubscriptionMessageConsumerAdapterIntegrationTest extends Specification {
     def conditions = new PollingConditions(timeout: 10, initialDelay: 1.5, factor: 1.25)
     def random = new Random()
 
+    @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
     def "should consume 'student-created' message "() {
         given:
         def id = random.nextLong()
@@ -66,6 +70,7 @@ class SubscriptionMessageConsumerAdapterIntegrationTest extends Specification {
         }
     }
 
+    @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
     def "should consume 'course-created' message "() {
         given:
         def id = random.nextLong()
@@ -79,6 +84,7 @@ class SubscriptionMessageConsumerAdapterIntegrationTest extends Specification {
         }
     }
 
+    @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
     def "should consume 'student-deleted' message "() {
         given:
         def id = random.nextLong()
@@ -96,6 +102,7 @@ class SubscriptionMessageConsumerAdapterIntegrationTest extends Specification {
         }
     }
 
+    @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
     def "should consume 'course-deleted' message "() {
         given:
         def id = random.nextLong()

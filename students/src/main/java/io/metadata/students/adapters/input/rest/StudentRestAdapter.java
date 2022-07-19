@@ -8,6 +8,8 @@ import io.metadata.students.domain.ports.input.DeleteStudentUseCase;
 import io.metadata.students.domain.ports.input.FetchStudentUseCase;
 import io.metadata.students.domain.ports.input.GetStudentUseCase;
 import io.metadata.students.domain.ports.input.UpdateStudentUseCase;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -34,13 +36,16 @@ public class StudentRestAdapter
     private final DeleteStudentUseCase deleteStudentUseCase;
     private final RestMapper mapper;
 
+    @Operation(summary = "Get a student by its id")
     @GetMapping("{studentId}")
-    public ResponseEntity<StudentResponse> get(@PathVariable("studentId") long studentId)
+    public ResponseEntity<StudentResponse> get(
+        @Parameter(description = "id of the student", required = true) @PathVariable("studentId") long studentId)
     {
         val student = getStudentUseCase.getById(studentId);
         return ResponseEntity.ok(student);
     }
 
+    @Operation(summary = "Fetch students")
     @GetMapping
     public ResponseEntity<Collection<StudentResponse>> fetch()
     {
@@ -48,6 +53,7 @@ public class StudentRestAdapter
         return ResponseEntity.ok(students);
     }
 
+    @Operation(summary = "Create a student")
     @PostMapping
     public ResponseEntity<Void> create(@RequestBody StudentRequest request, UriComponentsBuilder builder)
     {
@@ -57,8 +63,10 @@ public class StudentRestAdapter
         return ResponseEntity.created(location).build();
     }
 
+    @Operation(summary = "Modify a student")
     @PutMapping("{studentId}")
-    public ResponseEntity<StudentResponse> update(@PathVariable("studentId") long studentId, @RequestBody StudentRequest request)
+    public ResponseEntity<StudentResponse> update(
+        @Parameter(description = "id of the student", required = true) @PathVariable("studentId") long studentId, @RequestBody StudentRequest request)
     {
         val command = mapper.requestToUpdateCommand(studentId, request);
 
@@ -66,8 +74,10 @@ public class StudentRestAdapter
         return ResponseEntity.ok(student);
     }
 
+    @Operation(summary = "Delete a student by its id")
     @DeleteMapping("{studentId}")
-    public ResponseEntity<Void> delete(@PathVariable("studentId") long studentId)
+    public ResponseEntity<Void> delete(
+        @Parameter(description = "id of the student", required = true) @PathVariable("studentId") long studentId)
     {
         val command = mapper.requestToDeleteCommand(studentId);
 
