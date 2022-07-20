@@ -1,36 +1,40 @@
 package io.metadata.subscriptions.domain.services;
 
+import io.metadata.api.courses.CourseResponse;
 import io.metadata.api.students.StudentResponse;
-import io.metadata.api.subscriptions.CourseResponse;
 import io.metadata.api.subscriptions.SubscriptionResponse;
-import io.metadata.api.subscriptions.SubscriptionsResponse;
 import io.metadata.subscriptions.domain.model.CourseId;
 import io.metadata.subscriptions.domain.model.StudentId;
 import io.metadata.subscriptions.domain.model.Subscription;
 import io.metadata.subscriptions.domain.ports.input.FetchSubscriptionsByCourseUseCase;
 import io.metadata.subscriptions.domain.ports.input.FetchSubscriptionsByStudentUseCase;
 import io.metadata.subscriptions.domain.ports.input.SubscribeToCourseUseCase;
+import io.metadata.subscriptions.domain.ports.output.CourseOutputPort;
 import io.metadata.subscriptions.domain.ports.output.CourseServicePort;
+import io.metadata.subscriptions.domain.ports.output.StudentOutputPort;
 import io.metadata.subscriptions.domain.ports.output.StudentServicePort;
 import io.metadata.subscriptions.domain.ports.output.SubscriptionOutputPort;
+import io.metadata.subscriptions.domain.services.exception.CourseNotFoundException;
+import io.metadata.subscriptions.domain.services.exception.StudentNotFoundException;
 import io.metadata.subscriptions.domain.services.exception.SubscriptionNotAllowedException;
 import io.metadata.subscriptions.domain.services.mapper.ServiceMapper;
 import io.micrometer.core.annotation.Timed;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 @RequiredArgsConstructor
+@Slf4j
 public class SubscriptionService implements
     SubscribeToCourseUseCase,
     FetchSubscriptionsByCourseUseCase,
     FetchSubscriptionsByStudentUseCase
 {
     final SubscriptionOutputPort subscriptionOutputPort;
+    final CourseOutputPort courseOutputPort;
+    final StudentOutputPort studentOutputPort;
     final StudentServicePort studentServicePort;
     final CourseServicePort courseServicePort;
     final Long maxCoursesPerStudent;
@@ -39,18 +43,28 @@ public class SubscriptionService implements
 
     @Override
     @Timed
-    public SubscriptionsResponse fetchByStudentId(final Long studentId)
+    public Collection<CourseResponse> fetchByStudentId(final Long studentId)
     {
         val id = mapper.mapStudentId(studentId);
-        return getBy(subscriptionOutputPort.fetchByStudentId(id));
+        val subscriptions = subscriptionOutputPort.fetchByStudentId(id);
+
+        return subscriptions.stream()
+            .map(Subscription::getCourseId)
+            .map(courseServicePort::getById)
+            .collect(Collectors.toList());
     }
 
     @Override
     @Timed
-    public SubscriptionsResponse fetchByCourseId(final Long courseId)
+    public Collection<StudentResponse> fetchByCourseId(final Long courseId)
     {
         val id = mapper.mapCourseId(courseId);
-        return getBy(subscriptionOutputPort.fetchByCourseId(id));
+        val subscriptions = subscriptionOutputPort.fetchByCourseId(id);
+
+        return subscriptions.stream()
+            .map(Subscription::getStudentId)
+            .map(studentServicePort::getById)
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -59,9 +73,19 @@ public class SubscriptionService implements
     {
         val subscription = mapper.commandToDomain(command);
 
-        validateMaxCoursesPerStudent(subscription.getStudentId());
+        val courseId = subscription.getCourseId();
+        if (!courseOutputPort.exists(courseId)) {
+            throw new CourseNotFoundException();
+        }
 
-        validateMaxStudentsPerCourse(subscription.getCourseId());
+        val studentId = subscription.getStudentId();
+        if (!studentOutputPort.exists(studentId)) {
+            throw new StudentNotFoundException();
+        }
+
+        validateMaxCoursesPerStudent(studentId);
+
+        validateMaxStudentsPerCourse(courseId);
 
         val savedSubscription = subscriptionOutputPort.save(subscription);
         return mapper.domainToResponse(savedSubscription);
@@ -83,37 +107,5 @@ public class SubscriptionService implements
         if (coursesCount >= maxCoursesPerStudent) {
             throw new SubscriptionNotAllowedException();
         }
-    }
-
-    private SubscriptionsResponse getBy(final Collection<Subscription> subscriptions)
-    {
-        val courses = subscriptions.stream()
-            .map(Subscription::getCourseId)
-            .distinct()
-            .map(courseServicePort::getById)
-            .collect(Collectors.toMap(io.metadata.api.courses.CourseResponse::getId, Function.identity()));
-        val students = subscriptions.stream()
-            .map(Subscription::getStudentId)
-            .distinct()
-            .map(studentServicePort::getById)
-            .collect(Collectors.toMap(StudentResponse::getId, Function.identity()));
-
-        val courseResponses = subscriptions.stream().collect(Collectors.groupingBy(Subscription::getCourseId)).entrySet().stream()
-            .map(entry -> mapCourse(entry, courses, students))
-            .collect(Collectors.toList());
-
-        return mapper.coursesResponsesToSubscriptionsResponse(courseResponses);
-    }
-
-    private CourseResponse mapCourse(
-        final Map.Entry<CourseId, List<Subscription>> entry,
-        final Map<Long, io.metadata.api.courses.CourseResponse> courses,
-        final Map<Long, StudentResponse> students)
-    {
-        val courseResponse = courses.get(entry.getKey().getValue());
-        val studentResponses = entry.getValue().stream()
-            .map(a -> students.get(a.getStudentId().getValue()))
-            .collect(Collectors.toList());
-        return mapper.entryToCourseResponse(courseResponse, studentResponses);
     }
 }

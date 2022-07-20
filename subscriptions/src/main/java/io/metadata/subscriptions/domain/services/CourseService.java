@@ -1,6 +1,6 @@
 package io.metadata.subscriptions.domain.services;
 
-import io.metadata.api.subscriptions.CourseResponse;
+import io.metadata.api.courses.CourseResponse;
 import io.metadata.subscriptions.domain.ports.input.CreateCourseUseCase;
 import io.metadata.subscriptions.domain.ports.input.DeleteCourseUseCase;
 import io.metadata.subscriptions.domain.ports.input.FetchEmptyCourseUseCase;
@@ -12,9 +12,11 @@ import io.micrometer.core.annotation.Timed;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 @RequiredArgsConstructor
+@Slf4j
 public class CourseService implements
     CreateCourseUseCase,
     DeleteCourseUseCase,
@@ -51,7 +53,6 @@ public class CourseService implements
     {
         return courseOutputPort.fetchEmpty().stream()
             .map(courseServicePort::getById)
-            .map(mapper::courseResponseToResponse)
             .collect(Collectors.toList());
     }
 }

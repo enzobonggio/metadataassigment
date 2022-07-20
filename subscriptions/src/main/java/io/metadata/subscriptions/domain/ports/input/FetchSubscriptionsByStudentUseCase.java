@@ -1,9 +1,10 @@
 package io.metadata.subscriptions.domain.ports.input;
 
-import io.metadata.api.subscriptions.SubscriptionsResponse;
+import io.metadata.api.courses.CourseResponse;
+import java.util.Collection;
 
 public interface FetchSubscriptionsByStudentUseCase
 {
 
-    SubscriptionsResponse fetchByStudentId(Long studentId);
+    Collection<CourseResponse> fetchByStudentId(Long studentId);
 }

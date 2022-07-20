@@ -17,5 +17,4 @@ public interface SubscriptionOutputPort
     Long countByCourseId(CourseId id);
 
     Collection<Subscription> fetchByCourseId(CourseId id);
-
 }

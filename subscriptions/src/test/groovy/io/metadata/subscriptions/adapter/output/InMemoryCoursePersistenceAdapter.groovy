@@ -8,29 +8,35 @@ import io.metadata.subscriptions.domain.ports.output.CourseOutputPort
 class InMemoryCoursePersistenceAdapter implements CourseOutputPort {
 
     private final PersistenceMapper mapper
-    private final List<CourseEntity> subscriptions = []
+    private final Map<Long, CourseEntity> courses = new HashMap<>()
 
     InMemoryCoursePersistenceAdapter(final PersistenceMapper mapper) {
         this.mapper = mapper
     }
 
-
-    void clear() {
-        subscriptions.clear()
-    }
-
     @Override
     CourseId save(final CourseId id) {
-        return null
+        courses.put(id.value, mapper.domainToEntity(id))
+        return id
     }
 
     @Override
     CourseId delete(final CourseId id) {
-        return null
+        courses.remove(id.value)
+        return id
     }
 
     @Override
     Collection<CourseId> fetchEmpty() {
         return null
+    }
+
+    @Override
+    Boolean exists(final CourseId id) {
+        return courses.containsKey(id.value)
+    }
+
+    void clear() {
+        courses.clear()
     }
 }

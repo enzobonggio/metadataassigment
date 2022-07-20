@@ -1,8 +1,13 @@
 package io.metadata.subscriptions.domain.services
 
-
 import io.metadata.subscriptions.adapter.config.AdapterTestConfiguration
+import io.metadata.subscriptions.adapter.output.InMemoryCoursePersistenceAdapter
+import io.metadata.subscriptions.adapter.output.InMemoryStudentPersistenceAdapter
 import io.metadata.subscriptions.adapter.output.InMemorySubscriptionPersistenceAdapter
+import io.metadata.subscriptions.adapters.output.persistence.entity.CourseEntity
+import io.metadata.subscriptions.adapters.output.persistence.repository.StudentRepository
+import io.metadata.subscriptions.domain.model.CourseId
+import io.metadata.subscriptions.domain.model.StudentId
 import io.metadata.subscriptions.domain.ports.input.SubscribeToCourseUseCase
 import io.metadata.subscriptions.domain.services.exception.SubscriptionNotAllowedException
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,29 +24,44 @@ class SubscriptionServiceIntegrationTest extends Specification {
     SubscriptionService subscriptionsService
 
     @Autowired
-    InMemorySubscriptionPersistenceAdapter subscriptionAdapter;
+    InMemorySubscriptionPersistenceAdapter subscriptionPersistenceAdapter
+
+    @Autowired
+    InMemoryCoursePersistenceAdapter coursePersistenceAdapter
+
+    @Autowired
+    InMemoryStudentPersistenceAdapter studentPersistenceAdapter
 
     void cleanup() {
-        subscriptionAdapter.clear()
+        subscriptionPersistenceAdapter.clear()
+        coursePersistenceAdapter.clear()
+        studentPersistenceAdapter.clear()
     }
 
     def "1 student subscribe to 1 course"() {
         given:
-        def studentId = 1
-        def courseId = 1
+        def studentId = 1L
+        def courseId = 1L
+        createCourse(courseId)
+        createStudent(studentId)
         createSubscription(courseId, studentId)
         when:
         def responseByCourseId = subscriptionsService.fetchByCourseId(1)
         def responseByStudentId = subscriptionsService.fetchByStudentId(1)
         then:
-        responseByCourseId == responseByStudentId
+        responseByCourseId.collect { it.id }.toSet() == [studentId].toSet()
+        responseByStudentId.collect { it.id }.toSet() == [courseId].toSet()
     }
 
     def "2 students subscribe to 1 course"() {
         given:
-        def student1Id = 1
-        def student2Id = 2
-        def courseId = 1
+        def student1Id = 1L
+        def student2Id = 2L
+        def courseId = 1L
+        createCourse(courseId)
+        createStudent(student1Id)
+        createStudent(student2Id)
+
         createSubscription(courseId, student1Id)
         createSubscription(courseId, student2Id)
         when:
@@ -50,20 +70,19 @@ class SubscriptionServiceIntegrationTest extends Specification {
         def responseByStudent2Id = subscriptionsService.fetchByStudentId(2)
 
         then:
-        responseByCourseId.courses[0].students.toSet() ==
-                (responseByStudent1Id.courses[0].students.toSet() + responseByStudent2Id.courses[0].students.toSet())
-        responseByCourseId.courses[0].id == responseByStudent1Id.courses[0].id
-        responseByCourseId.courses[0].name == responseByStudent1Id.courses[0].name
-        responseByCourseId.courses[0].id == responseByStudent2Id.courses[0].id
-        responseByCourseId.courses[0].name == responseByStudent2Id.courses[0].name
-
+        responseByCourseId.collect { it.id }.toSet() == [student1Id, student2Id].toSet()
+        responseByStudent1Id.collect { it.id }.toSet() == [courseId].toSet()
+        responseByStudent2Id.collect { it.id }.toSet() == [courseId].toSet()
     }
 
     def "1 students subscribe to 2 courses"() {
         given:
-        def studentId = 1
-        def course1Id = 1
-        def course2Id = 2
+        def studentId = 1L
+        def course1Id = 1L
+        def course2Id = 2L
+        createCourse(course1Id)
+        createCourse(course2Id)
+        createStudent(studentId)
 
         createSubscription(course1Id, studentId)
         createSubscription(course2Id, studentId)
@@ -74,16 +93,17 @@ class SubscriptionServiceIntegrationTest extends Specification {
         def responseByStudentId = subscriptionsService.fetchByStudentId(1)
 
         then:
-        responseByCourse1Id.courses[0].students.toSet() == responseByCourse2Id.courses[0].students.toSet()
-        responseByCourse1Id.courses[0].students.toSet() == responseByStudentId.courses[0].students.toSet()
-        responseByStudentId.courses.toSet() == (responseByCourse1Id.courses.toSet() + responseByCourse2Id.courses.toSet())
+        responseByCourse1Id.collect { it.id }.toSet() == [studentId].toSet()
+        responseByCourse2Id.collect { it.id }.toSet() == [studentId].toSet()
+        responseByStudentId.collect { it.id }.toSet() == [course1Id, course2Id].toSet()
     }
 
     def "more students than they should subscribe to 1 courses"() {
         when:
         def courseId = 1
-
+        createCourse(courseId)
         (0..50).each {
+            createStudent(it)
             createSubscription(courseId, it)
         }
 
@@ -94,8 +114,10 @@ class SubscriptionServiceIntegrationTest extends Specification {
     def "1 student subscribe to more courses than it should"() {
         when:
         def studentId = 1
+        createStudent(studentId)
 
         (0..5).each {
+            createCourse(it)
             createSubscription(it, studentId)
         }
 
@@ -109,6 +131,14 @@ class SubscriptionServiceIntegrationTest extends Specification {
                 .studentId(studentId)
                 .build()
         return subscriptionsService.subscribe(command)
+    }
+
+    def createCourse(long courseId) {
+        coursePersistenceAdapter.save(CourseId.of(courseId))
+    }
+
+    def createStudent(long studentId) {
+        studentPersistenceAdapter.save(StudentId.of(studentId))
     }
 
 }

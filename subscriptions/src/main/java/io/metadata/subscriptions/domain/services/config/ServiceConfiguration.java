@@ -33,6 +33,8 @@ public class ServiceConfiguration
     @Bean
     SubscriptionService sub(
         SubscriptionOutputPort subscriptionOutputPort,
+        CourseOutputPort courseOutputPort,
+        StudentOutputPort studentOutputPort,
         StudentServicePort studentServicePort,
         CourseServicePort courseServicePort,
         @Value("${courses.maxPerStudent:5}") Long maxCoursesPerStudent,
@@ -40,6 +42,8 @@ public class ServiceConfiguration
     {
         return new SubscriptionService(
             subscriptionOutputPort,
+            courseOutputPort,
+            studentOutputPort,
             studentServicePort,
             courseServicePort,
             maxCoursesPerStudent,

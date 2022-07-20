@@ -1,10 +1,8 @@
 package io.metadata.subscriptions.domain.services.mapper;
 
 import io.metadata.api.Subscriptions;
-import io.metadata.api.subscriptions.StudentResponse;
-import io.metadata.api.subscriptions.CourseResponse;
+import io.metadata.api.courses.CourseResponse;
 import io.metadata.api.subscriptions.SubscriptionResponse;
-import io.metadata.api.subscriptions.SubscriptionsResponse;
 import io.metadata.subscriptions.domain.model.CourseId;
 import io.metadata.subscriptions.domain.model.StudentId;
 import io.metadata.subscriptions.domain.model.Subscription;
@@ -13,7 +11,6 @@ import io.metadata.subscriptions.domain.ports.input.CreateStudentUseCase;
 import io.metadata.subscriptions.domain.ports.input.DeleteCourseUseCase;
 import io.metadata.subscriptions.domain.ports.input.DeleteStudentUseCase;
 import io.metadata.subscriptions.domain.ports.input.SubscribeToCourseUseCase;
-import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -40,11 +37,6 @@ public interface ServiceMapper
         @Mapping(source = "courseResponse.id", target = "id"),
         @Mapping(source = "studentResponses", target = "students")
     })
-    CourseResponse entryToCourseResponse(io.metadata.api.courses.CourseResponse courseResponse, List<io.metadata.api.students.StudentResponse> studentResponses);
-
-    StudentResponse studentResponseToResponse(io.metadata.api.students.StudentResponse response);
-
-    CourseResponse courseResponseToResponse(io.metadata.api.courses.CourseResponse response);
 
     default StudentId mapStudentId(Long id)
     {
@@ -74,10 +66,5 @@ public interface ServiceMapper
     default StudentId commandToStudentId(DeleteStudentUseCase.Command command)
     {
         return mapStudentId(command.getId());
-    }
-
-    default SubscriptionsResponse coursesResponsesToSubscriptionsResponse(List<CourseResponse> courseResponses)
-    {
-        return SubscriptionsResponse.builder().courses(courseResponses).build();
     }
 }

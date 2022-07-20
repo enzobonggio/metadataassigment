@@ -1,10 +1,9 @@
 package io.metadata.subscriptions.domain.services;
 
-import io.metadata.api.subscriptions.StudentResponse;
+import io.metadata.api.students.StudentResponse;
 import io.metadata.subscriptions.domain.ports.input.CreateStudentUseCase;
 import io.metadata.subscriptions.domain.ports.input.DeleteStudentUseCase;
 import io.metadata.subscriptions.domain.ports.input.FetchLazyStudentUseCase;
-import io.metadata.subscriptions.domain.ports.output.CourseServicePort;
 import io.metadata.subscriptions.domain.ports.output.StudentOutputPort;
 import io.metadata.subscriptions.domain.ports.output.StudentServicePort;
 import io.metadata.subscriptions.domain.ports.output.SubscriptionMessageSender;
@@ -52,7 +51,6 @@ public class StudentService implements
     {
         return studentOutputPort.fetchLazy().stream()
             .map(studentServicePort::getById)
-            .map(mapper::studentResponseToResponse)
             .collect(Collectors.toList());
     }
 }

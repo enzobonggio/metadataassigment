@@ -11,4 +11,5 @@ public interface StudentOutputPort
 
     Collection<StudentId> fetchLazy();
 
+    Boolean exists(StudentId id);
 }

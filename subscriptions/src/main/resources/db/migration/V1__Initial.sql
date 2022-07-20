@@ -1,12 +1,14 @@
 CREATE TABLE courses
 (
     id         BIGINT PRIMARY KEY,
+    deleted    BOOLEAN default FALSE,
     created_at TIMESTAMP
 );
 
 CREATE TABLE students
 (
     id         BIGINT PRIMARY KEY,
+    deleted    BOOLEAN default FALSE,
     created_at TIMESTAMP
 );
 

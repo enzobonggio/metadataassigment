@@ -159,30 +159,47 @@ of going all the time to a service that could be down.
 
 ## Improvements
 
-### Tracing
-
-As a call for creating a student/ course goes though lots of steps I believe that using a `traceid` along all the flow
-should be an easy win.
-
-We could later use `zipkin` to visualize how it impacts all the resources.
-
 ### Redis
 
 As spring let me use `@Cacheable` annotation and decide later what was going to be my implementation and though it was
 easier to use a file system cache for this assigment. In the future it would be better to use redis/memcache to save the
 responses of the services. Also having some expire on the information that is not used often is another thing to do.
 
-### Grafana
 
-To have a way to show the prometheus metrics and give them a sense
+### Test
 
-## Static check
+#### Static check
 
 Adding a way to check the code static like sonar is a good way to enforce good practices and also to have min standards.
 For example, we could check what is the coverage of the code and decide to continue or not with deploy / merge depeding
 on that
 
-## Contract test
+#### Contract test
 
 Thinking on different team working on different microservices is good to have contract tests to assure that different ms
 can communicate with each other
+
+### Microservices architecture
+
+I didn't like how the endpoints looks like, that is mainly because I'm missing a `BFF` on top of our current ms that
+work as an aggregator of the information. That way we don't have interactions between `ms` on the same level and also
+endpoints could be a more `rest full`.
+
+### Monitoring
+
+#### Grafana
+
+To have a way to show the prometheus metrics and give them a sense
+
+
+#### Logs
+
+We will need to index all logs in order to make it easy to look for them. Datadog or elasticsearch could work for this
+purpose.
+
+#### Tracing
+
+As a call for creating a student/ course goes though lots of steps I believe that using a `traceid` along all the flow
+should be an easy win.
+
+We could later use `zipkin` to visualize how it impacts all the resources.

@@ -33,6 +33,7 @@ public class SubscriptionMessageConsumerAdapter implements SubscriptionMessageCo
     @KafkaListener(id = EXEC + "_student-created", topics = "student-created")
     public void consumeMessageForStudentCreated(final byte[] event)
     {
+        log.info("consuming student-created message");
         val message = getStudentMessage(event);
         if (message.isPresent()) {
             try {
@@ -49,6 +50,7 @@ public class SubscriptionMessageConsumerAdapter implements SubscriptionMessageCo
     @KafkaListener(id = EXEC + "_student-deleted", topics = "student-deleted")
     public void consumeMessageForStudentDeleted(final byte[] event)
     {
+        log.info("consuming student-deleted message");
         val message = getStudentMessage(event);
         if (message.isPresent()) {
             try {
@@ -65,6 +67,7 @@ public class SubscriptionMessageConsumerAdapter implements SubscriptionMessageCo
     @KafkaListener(id = EXEC + "_course-created", topics = "course-created")
     public void consumeMessageForCourseCreated(final byte[] event)
     {
+        log.info("consuming course-created message");
         val message = getCourseMessage(event);
         if (message.isPresent()) {
             try {
@@ -81,11 +84,15 @@ public class SubscriptionMessageConsumerAdapter implements SubscriptionMessageCo
     @KafkaListener(id = EXEC + "_course-deleted", topics = "course-deleted")
     public void consumeMessageForCourseDeleted(final byte[] event)
     {
+        log.info("consuming course-deleted message");
         val message = getCourseMessage(event);
+        log.trace("course-deleted message {}", message);
         if (message.isPresent()) {
             try {
                 val command = restMapper.messageToDeleteCommand(message.get());
+                log.trace("delete course command {}", command);
                 deleteCourseUseCase.delete(command);
+                log.trace("success delete course command {}", command);
             }
             catch (Exception e) {
                 log.error("Unexpected Error while consuming message {}", message, e);

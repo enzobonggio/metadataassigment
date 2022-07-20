@@ -48,6 +48,7 @@ public class CourseService implements
     @Timed
     public void delete(final DeleteCourseUseCase.Command command)
     {
+        getById(command.getId());
         val id = mapper.commandToCourseId(command);
         courseOutputPort.deleteById(id);
         val deletedEvent = mapper.courseIdToMessage(id);

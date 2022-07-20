@@ -3,6 +3,7 @@ package io.metadata.subscriptions.adapters.output.persistence;
 import io.metadata.subscriptions.adapters.output.persistence.exception.DuplicatedStudentException;
 import io.metadata.subscriptions.adapters.output.persistence.mapper.PersistenceMapper;
 import io.metadata.subscriptions.adapters.output.persistence.repository.StudentRepository;
+import io.metadata.subscriptions.domain.model.CourseId;
 import io.metadata.subscriptions.domain.model.StudentId;
 import io.metadata.subscriptions.domain.ports.output.StudentOutputPort;
 import java.util.Collection;
@@ -11,6 +12,7 @@ import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.relational.core.conversion.DbActionExecutionException;
@@ -38,10 +40,17 @@ public class StudentPersistenceAdapter implements StudentOutputPort
     }
 
     @Override
-    @CacheEvict(value = "student", key = "{#id.value}")
+    @Cacheable(value = "student-exists", key = "{#id.value}")
+    public Boolean exists(StudentId id)
+    {
+        return studentRepository.existsById(id.getValue());
+    }
+
+    @Override
+    @CacheEvict(value = {"student", "student-exists"}, key = "{#id.value}")
     public StudentId delete(final StudentId id)
     {
-        studentRepository.deleteById(id.getValue());
+        studentRepository.softDeleteById(id.getValue());
         return id;
     }
 

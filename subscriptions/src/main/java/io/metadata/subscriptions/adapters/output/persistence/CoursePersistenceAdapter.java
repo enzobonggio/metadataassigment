@@ -11,6 +11,8 @@ import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.relational.core.conversion.DbActionExecutionException;
@@ -38,10 +40,17 @@ public class CoursePersistenceAdapter implements CourseOutputPort
     }
 
     @Override
-    @CacheEvict(value = "course", key = "{#id.value}")
+    @Cacheable(value = "course-exists", key = "{#id.value}")
+    public Boolean exists(CourseId id)
+    {
+        return courseRepository.existsById(id.getValue());
+    }
+
+    @Override
+    @CacheEvict(value = {"course", "course-exists"}, key = "{#id.value}")
     public CourseId delete(final CourseId id)
     {
-        courseRepository.deleteById(id.getValue());
+        courseRepository.softDeleteById(id.getValue());
         return id;
     }
 

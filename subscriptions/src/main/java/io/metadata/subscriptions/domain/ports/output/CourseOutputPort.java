@@ -10,4 +10,6 @@ public interface CourseOutputPort
     CourseId delete(CourseId id);
 
     Collection<CourseId> fetchEmpty();
+
+    Boolean exists(CourseId id);
 }
